@@ -81,6 +81,7 @@ const DEFAULTS = {
   dateFont: 'rajdhani',
   ddayFont: 'rajdhani',
   eventsFont: 'rajdhani',
+  quoteFont: 'rajdhani',
   theme: 'green',
   theme2: 'gray',
   bgOpacity: 88,
@@ -542,6 +543,7 @@ function applySettings() {
   root.setProperty('--date-font', fontInfo(state.dateFont).family);
   root.setProperty('--dday-font', fontInfo(state.ddayFont).family);
   root.setProperty('--events-font', fontInfo(state.eventsFont).family);
+  root.setProperty('--quote-font', fontInfo(state.quoteFont).family);
   root.setProperty('--fg', theme.fg);
   root.setProperty('--glow', theme.glow);
   root.setProperty('--fg2', SUB_COLORS[state.theme2] || SUB_COLORS.gray);
@@ -689,6 +691,7 @@ function buildSettingsUI() {
     makeFontPicker('fp-date', 'dateFont');
     makeFontPicker('fp-dday', 'ddayFont');
     makeFontPicker('fp-events', 'eventsFont');
+    makeFontPicker('fp-quote', 'quoteFont');
   });
 
   fillSelect('opt-anim', Object.entries(ANIMS),

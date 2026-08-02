@@ -235,6 +235,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
 
 /* daily quote: wraps within the clock width, never widens the stack */
 #quote-row {
+  font-family: var(--quote-font, inherit);
   width: 0;
   min-width: 100%;
   margin-top: 0.15em;
