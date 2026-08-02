@@ -60,7 +60,12 @@ html, body {
   border-radius: 14px;
   background: rgba(var(--bg), var(--bg-opacity));
   overflow: hidden;
+  transition: box-shadow 0.25s;
 }
+
+/* hover: outline the widget bounds so its size is easy to gauge */
+#app:hover { box-shadow: inset 0 0 0 1px var(--glow); }
+body.settings-mode #app:hover { box-shadow: none; }
 
 /* ---------- clock face ---------- */
 #clock {
