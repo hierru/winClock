@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>winClock</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- window controls (visible on hover) -->
+    <div id="controls">
+      <button id="btn-pin" class="ctrl" title="항상 위에 고정">📌</button>
+      <button id="btn-settings" class="ctrl" title="설정">⚙</button>
+      <button id="btn-min" class="ctrl tauri-only" title="최소화">–</button>
+      <button id="btn-close" class="ctrl tauri-only" title="닫기">✕</button>
+    </div>
+
+    <!-- clock face -->
+    <main id="clock" data-tauri-drag-region>
+      <div id="stack">
+        <div id="date" class="display"></div>
+        <div id="time-row" class="display">
+          <span id="time-wrap">
+            <span id="time-ghost" aria-hidden="true"></span>
+            <span id="time"></span>
+          </span>
+          <span id="ampm"></span>
+        </div>
+        <div id="dday-row" class="display"></div>
+        <div id="events-row" class="display"></div>
+      </div>
+    </main>
+
+    <!-- settings panel -->
+    <div id="settings" class="hidden">
+      <div id="settings-inner">
+        <h2>설정
+          <button id="btn-settings-close" title="닫기">✕</button>
+        </h2>
+
+        <section>
+          <h3>폰트</h3>
+          <div class="fp-row"><span>시간</span><div id="fp-time"></div></div>
+          <div class="fp-row"><span>날짜</span><div id="fp-date"></div></div>
+          <div class="fp-row"><span>D-Day</span><div id="fp-dday"></div></div>
+          <div class="fp-row"><span>일정</span><div id="fp-events"></div></div>
+        </section>
+
+        <section>
+          <h3>색상</h3>
+          <div class="swatch-label">시간 · 날짜</div>
+          <div id="opt-theme" class="swatches"></div>
+          <div class="swatch-label">D-Day · 일정</div>
+          <div id="opt-theme2" class="swatches"></div>
+        </section>
+
+        <section>
+          <h3>배경</h3>
+          <label class="row">불투명도
+            <input type="range" id="opt-bg-opacity" min="0" max="100" step="5" />
+            <span id="bg-opacity-val"></span>
+          </label>
+        </section>
+
+        <section class="tauri-only">
+          <h3>일반</h3>
+          <label class="row"><input type="checkbox" id="opt-autostart" /> Windows 시작 시 자동 실행</label>
+        </section>
+
+        <section>
+          <h3>시간</h3>
+          <label class="row"><input type="checkbox" id="opt-h24" /> 24시간제</label>
+          <label class="row"><input type="checkbox" id="opt-seconds" /> 초 표시</label>
+          <label class="row"><input type="checkbox" id="opt-blink" /> 콜론 깜박임</label>
+          <label class="row">숫자 애니메이션
+            <select id="opt-anim" class="inline"></select>
+          </label>
+          <label class="row">시계 크기
+            <input type="range" id="opt-scale" min="30" max="100" step="5" />
+            <span id="scale-val"></span>
+          </label>
+        </section>
+
+        <section>
+          <h3>날짜</h3>
+          <select id="opt-date-format"></select>
+        </section>
+
+        <section>
+          <h3>D-Day</h3>
+          <label class="row"><input type="checkbox" id="opt-show-dday" /> 시계에 표시</label>
+          <ul id="dday-list"></ul>
+          <div id="dday-add">
+            <input type="text" id="dday-name" placeholder="이벤트 이름" maxlength="20" />
+            <input type="date" id="dday-date" />
+            <button id="dday-add-btn">추가</button>
+          </div>
+        </section>
+
+        <section>
+          <h3>Google 캘린더</h3>
+          <label class="row"><input type="checkbox" id="opt-show-events" /> 시계에 표시</label>
+          <ul id="cal-list"></ul>
+          <div id="cal-add">
+            <input type="text" id="cal-name" placeholder="이름(선택)" maxlength="10" />
+            <input type="text" id="cal-url" placeholder="https://…/basic.ics" />
+            <button id="cal-add-btn">추가</button>
+          </div>
+          <label class="row">표시 일정 수
+            <select id="cal-count" class="inline"></select>
+          </label>
+          <button id="cal-save" class="primary">새로고침</button>
+          <div id="cal-status"></div>
+          <p class="hint">
+            Google 캘린더(웹) → 설정 → 왼쪽에서 내 캘린더 선택 →
+            <b>일정 액세스 권한</b> → <b>iCal 형식의 비공개 주소</b>를 복사해 붙여넣으세요.
+            일정은 30분마다 자동 갱신됩니다.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>

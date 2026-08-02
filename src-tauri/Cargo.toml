@@ -1,0 +1,18 @@
+[package]
+name = "winclock"
+version = "0.1.0"
+description = "Digital clock widget for Windows"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+reqwest = "0.12"
+winreg = "0.55"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

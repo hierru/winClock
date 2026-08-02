@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "winclock-ui",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "src", "-p", "5173", "-c-1"],
+      "port": 5173
+    }
+  ]
+}
