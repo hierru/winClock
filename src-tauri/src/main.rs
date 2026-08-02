@@ -134,7 +134,16 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
+    use tauri_plugin_window_state::StateFlags;
+
     tauri::Builder::default()
+        // restore window position/size from the previous run; skip VISIBLE so
+        // quitting from the tray while hidden never restores an invisible window
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(StateFlags::all() ^ StateFlags::VISIBLE)
+                .build(),
+        )
         .setup(|app| {
             setup_tray(app)?;
             Ok(())

@@ -11,6 +11,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["tray-icon"] }
 reqwest = "0.12"
 winreg = "0.55"
+tauri-plugin-window-state = "2.4.1"
 
 [profile.release]
 strip = true
