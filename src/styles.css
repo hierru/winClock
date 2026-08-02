@@ -251,9 +251,27 @@ body.settings-mode #app:hover { box-shadow: none; }
 #btn-pin.active { opacity: 1; background: rgba(255, 255, 255, 0.18); }
 body.no-tauri .tauri-only { display: none; }
 
+/* move hint, visible only while hovering */
+#move-hint {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #8b949c;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+#app:hover #move-hint { opacity: 0.75; }
+body.settings-mode #move-hint { display: none; }
+
 /* tiny windows: hide hover buttons entirely — use the right-click menu */
 @media (max-height: 130px), (max-width: 260px) {
-  #controls { display: none; }
+  #controls, #move-hint { display: none; }
 }
 
 /* ---------- dedicated settings window (?settings=1) ---------- */

@@ -954,6 +954,14 @@ document.addEventListener('contextmenu', (e) => {
   ctxMenu.style.top = Math.max(0, Math.min(e.clientY, window.innerHeight - r.height - 4)) + 'px';
 });
 
+/* move the window with Ctrl + left-drag (replaces the always-on drag region) */
+clock.addEventListener('mousedown', (e) => {
+  if (e.button === 0 && e.ctrlKey && tauriWin) {
+    e.preventDefault();
+    tauriWin.startDragging();
+  }
+});
+
 /* the backdrop sits above the drag region, so it reliably gets the click */
 ctxBackdrop.addEventListener('mousedown', hideCtxMenu);
 document.addEventListener('mousedown', (e) => {
