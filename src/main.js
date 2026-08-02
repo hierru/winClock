@@ -90,6 +90,10 @@ const DEFAULTS = {
   blink: false,
   anim: 'slide',
   scale: 100,
+  dateScale: 100,
+  ddayScale: 100,
+  eventsScale: 100,
+  quoteScale: 100,
   dateFormat: 'ko',
   alwaysOnTop: false,
   showDday: true,
@@ -544,6 +548,10 @@ function applySettings() {
   root.setProperty('--dday-font', fontInfo(state.ddayFont).family);
   root.setProperty('--events-font', fontInfo(state.eventsFont).family);
   root.setProperty('--quote-font', fontInfo(state.quoteFont).family);
+  root.setProperty('--date-size', (0.14 * state.dateScale / 100).toFixed(4) + 'em');
+  root.setProperty('--dday-size', (0.115 * state.ddayScale / 100).toFixed(4) + 'em');
+  root.setProperty('--events-size', (0.095 * state.eventsScale / 100).toFixed(4) + 'em');
+  root.setProperty('--quote-size', (0.085 * state.quoteScale / 100).toFixed(4) + 'em');
   root.setProperty('--fg', theme.fg);
   root.setProperty('--glow', theme.glow);
   root.setProperty('--fg2', SUB_COLORS[state.theme2] || SUB_COLORS.gray);
@@ -711,6 +719,10 @@ function buildSettingsUI() {
 
   bindRange('opt-bg-opacity', 'bg-opacity-val', 'bgOpacity', '%');
   bindRange('opt-scale', 'scale-val', 'scale', '%');
+  bindRange('opt-date-scale', 'date-scale-val', 'dateScale', '%');
+  bindRange('opt-dday-scale', 'dday-scale-val', 'ddayScale', '%');
+  bindRange('opt-events-scale', 'events-scale-val', 'eventsScale', '%');
+  bindRange('opt-quote-scale', 'quote-scale-val', 'quoteScale', '%');
 
   bindCheck('opt-h24', 'h24');
   bindCheck('opt-seconds', 'seconds');

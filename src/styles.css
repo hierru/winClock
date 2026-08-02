@@ -102,7 +102,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
 
 #date {
   font-family: var(--date-font, inherit);
-  font-size: 0.14em;
+  font-size: var(--date-size, 0.14em);
   letter-spacing: 0.08em;
   opacity: 0.85;
   white-space: nowrap;
@@ -187,7 +187,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   font-family: var(--dday-font, inherit);
   display: flex;
   gap: 1.2em;
-  font-size: 0.115em;
+  font-size: var(--dday-size, 0.115em);
   letter-spacing: 0.04em;
   white-space: nowrap;
   color: var(--fg2);
@@ -205,7 +205,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   gap: 0.3em;
   width: 0;
   min-width: 100%;
-  font-size: 0.095em;
+  font-size: var(--events-size, 0.095em);
   letter-spacing: 0.03em;
   color: var(--fg2);
   opacity: 0.95;
@@ -239,7 +239,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   width: 0;
   min-width: 100%;
   margin-top: 0.15em;
-  font-size: 0.085em;
+  font-size: var(--quote-size, 0.085em);
   line-height: 1.45;
   text-align: center;
   color: var(--fg2);

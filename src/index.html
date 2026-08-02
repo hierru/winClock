@@ -111,11 +111,19 @@
         <section>
           <h3>날짜</h3>
           <select id="opt-date-format"></select>
+          <label class="row">크기
+            <input type="range" id="opt-date-scale" min="50" max="200" step="10" />
+            <span id="date-scale-val"></span>
+          </label>
         </section>
 
         <section>
           <h3>D-Day</h3>
           <label class="row"><input type="checkbox" id="opt-show-dday" /> 시계에 표시</label>
+          <label class="row">크기
+            <input type="range" id="opt-dday-scale" min="50" max="200" step="10" />
+            <span id="dday-scale-val"></span>
+          </label>
           <ul id="dday-list"></ul>
           <div id="dday-add">
             <input type="text" id="dday-name" placeholder="이벤트 이름" maxlength="20" />
@@ -127,11 +135,19 @@
         <section>
           <h3>오늘의 명언</h3>
           <label class="row"><input type="checkbox" id="opt-show-quote" /> 시계에 표시 (매일 자동 교체)</label>
+          <label class="row">크기
+            <input type="range" id="opt-quote-scale" min="50" max="200" step="10" />
+            <span id="quote-scale-val"></span>
+          </label>
         </section>
 
         <section>
           <h3>Google 캘린더</h3>
           <label class="row"><input type="checkbox" id="opt-show-events" /> 시계에 표시</label>
+          <label class="row">크기
+            <input type="range" id="opt-events-scale" min="50" max="200" step="10" />
+            <span id="events-scale-val"></span>
+          </label>
           <ul id="cal-list"></ul>
           <div id="cal-add">
             <input type="text" id="cal-name" placeholder="이름(선택)" maxlength="10" />
