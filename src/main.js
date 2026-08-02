@@ -960,6 +960,7 @@ ctxMenu.addEventListener('click', (e) => {
   if (act === 'settings') openSettings();
   else if (act === 'pin') setPin(!state.alwaysOnTop);
   else if (act === 'min') tauriWin && tauriWin.minimize();
+  else if (act === 'tray') tauriWin && tauriWin.hide();
   else if (act === 'close') tauriWin && tauriWin.close();
 });
 
