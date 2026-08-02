@@ -277,6 +277,15 @@ body.settings-mode ::-webkit-scrollbar-thumb:hover { background: #55585c; }
 body.settings-mode ::-webkit-scrollbar-track { background: transparent; }
 
 /* ---------- context menu ---------- */
+/* invisible layer that sits above the drag region while the menu is open,
+   so the next click reliably reaches JS and closes the menu */
+#ctx-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+#ctx-backdrop.hidden { display: none; }
+
 #ctx-menu {
   position: fixed;
   z-index: 100;

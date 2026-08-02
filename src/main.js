@@ -935,23 +935,32 @@ pinBtn.onclick = () => setPin(!state.alwaysOnTop);
 /* ---------- right-click context menu ---------- */
 
 const ctxMenu = $('ctx-menu');
+const ctxBackdrop = $('ctx-backdrop');
 const ctxPinBtn = ctxMenu.querySelector('[data-act="pin"]');
 
-function hideCtxMenu() { ctxMenu.classList.add('hidden'); }
+function hideCtxMenu() {
+  ctxMenu.classList.add('hidden');
+  ctxBackdrop.classList.add('hidden');
+}
 
 document.addEventListener('contextmenu', (e) => {
   // keep the native menu inside settings (paste on inputs)
   if (e.target.closest('#settings')) return;
   e.preventDefault();
+  ctxBackdrop.classList.remove('hidden');
   ctxMenu.classList.remove('hidden');
   const r = ctxMenu.getBoundingClientRect();
   ctxMenu.style.left = Math.max(0, Math.min(e.clientX, window.innerWidth - r.width - 4)) + 'px';
   ctxMenu.style.top = Math.max(0, Math.min(e.clientY, window.innerHeight - r.height - 4)) + 'px';
 });
 
+/* the backdrop sits above the drag region, so it reliably gets the click */
+ctxBackdrop.addEventListener('mousedown', hideCtxMenu);
 document.addEventListener('mousedown', (e) => {
-  if (!e.target.closest('#ctx-menu')) hideCtxMenu();
+  if (!e.target.closest('#ctx-menu') && e.target !== ctxBackdrop) hideCtxMenu();
 });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideCtxMenu(); });
+window.addEventListener('blur', hideCtxMenu);
 
 ctxMenu.addEventListener('click', (e) => {
   const act = e.target.closest('[data-act]')?.dataset.act;
