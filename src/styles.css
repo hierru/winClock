@@ -223,6 +223,20 @@ body.settings-mode #app:hover, body.settings-mode #app.hovered { box-shadow: non
   vertical-align: middle;
 }
 
+/* daily quote: wraps within the clock width, never widens the stack */
+#quote-row {
+  width: 0;
+  min-width: 100%;
+  margin-top: 0.15em;
+  font-size: 0.085em;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--fg2);
+  opacity: 0.8;
+}
+#quote-row .quote-text { font-style: italic; }
+#quote-row .quote-author { margin-left: 0.6em; opacity: 0.7; white-space: nowrap; }
+
 /* ---------- window controls ---------- */
 #controls {
   position: absolute;

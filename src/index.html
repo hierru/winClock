@@ -29,6 +29,7 @@
         </div>
         <div id="dday-row" class="display"></div>
         <div id="events-row" class="display"></div>
+        <div id="quote-row" class="display"></div>
       </div>
     </main>
 
@@ -123,6 +124,11 @@
         </section>
 
         <section>
+          <h3>오늘의 명언</h3>
+          <label class="row"><input type="checkbox" id="opt-show-quote" /> 시계에 표시 (매일 자동 교체)</label>
+        </section>
+
+        <section>
           <h3>Google 캘린더</h3>
           <label class="row"><input type="checkbox" id="opt-show-events" /> 시계에 표시</label>
           <ul id="cal-list"></ul>
@@ -145,6 +151,7 @@
       </div>
     </div>
   </div>
+  <script src="quotes.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

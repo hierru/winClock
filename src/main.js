@@ -93,6 +93,7 @@ const DEFAULTS = {
   alwaysOnTop: false,
   showDday: true,
   showEvents: true,
+  showQuote: true,
   ddays: [],
   calUrls: [],
   calCount: 2,
@@ -129,7 +130,7 @@ function saveState() {
 const $ = (id) => document.getElementById(id);
 const app = $('app'), clock = $('clock'), stack = $('stack');
 const elDate = $('date'), elTime = $('time'), elGhost = $('time-ghost'), elAmpm = $('ampm');
-const elDday = $('dday-row'), elEvents = $('events-row');
+const elDday = $('dday-row'), elEvents = $('events-row'), elQuote = $('quote-row');
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -254,6 +255,26 @@ function renderDdays() {
     elDday.appendChild(span);
   }
   elDday.style.display = items.length && state.showDday ? '' : 'none';
+}
+
+/* ---------- daily quote ---------- */
+
+function renderQuote() {
+  elQuote.innerHTML = '';
+  if (!state.showQuote || typeof QUOTES === 'undefined' || !QUOTES.length) {
+    elQuote.style.display = 'none';
+    return;
+  }
+  const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+  const q = QUOTES[day % QUOTES.length];
+  const text = document.createElement('span');
+  text.className = 'quote-text';
+  text.textContent = `“${q.t}”`;
+  const author = document.createElement('span');
+  author.className = 'quote-author';
+  author.textContent = `— ${q.a}`;
+  elQuote.append(text, author);
+  elQuote.style.display = '';
 }
 
 /* ---------- google calendar (ICS) ---------- */
@@ -505,6 +526,7 @@ function tick() {
     lastDay = now.getDate();
     renderDate(now);
     renderDdays();
+    renderQuote();
     fit();
   }
   setTimeout(tick, 1000 - now.getMilliseconds() + 10);
@@ -532,6 +554,7 @@ function applySettings() {
   renderDate(new Date());
   renderDdays();
   renderEvents();
+  renderQuote();
   fit();
   saveState();
 }
@@ -719,6 +742,7 @@ function buildSettingsUI() {
   // d-day
   bindCheck('opt-show-dday', 'showDday');
   bindCheck('opt-show-events', 'showEvents');
+  bindCheck('opt-show-quote', 'showQuote');
   renderDdayList();
   $('dday-add-btn').onclick = addDday;
   $('dday-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') addDday(); });
