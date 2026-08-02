@@ -987,6 +987,30 @@ function startHoverWatch() {
 }
 document.addEventListener('mousemove', startHoverWatch);
 
+/* highlight the resize grip/arrow nearest to the cursor */
+const guides = {
+  tl: document.querySelector('#resize-guides .tl'),
+  bl: document.querySelector('#resize-guides .bl'),
+  br: document.querySelector('#resize-guides .br'),
+  l:  document.querySelector('#resize-guides .edge.l'),
+  r:  document.querySelector('#resize-guides .edge.r'),
+  b:  document.querySelector('#resize-guides .edge.b'),
+};
+
+document.addEventListener('mousemove', (e) => {
+  const W = window.innerWidth, H = window.innerHeight;
+  const x = e.clientX, y = e.clientY;
+  const CORNER = Math.min(90, W / 3, H / 3);
+  const EDGE = 36;
+  const near = (dx, dy) => Math.hypot(dx, dy) < CORNER;
+  guides.tl.classList.toggle('near', near(x, y));
+  guides.bl.classList.toggle('near', near(x, H - y));
+  guides.br.classList.toggle('near', near(W - x, H - y));
+  guides.l.classList.toggle('near', x < EDGE && !near(x, y) && !near(x, H - y));
+  guides.r.classList.toggle('near', W - x < EDGE && !near(W - x, H - y));
+  guides.b.classList.toggle('near', H - y < EDGE && !near(x, H - y) && !near(W - x, H - y));
+});
+
 /* move the window with Ctrl + left-drag (replaces the always-on drag region) */
 clock.addEventListener('mousedown', (e) => {
   if (e.button === 0 && e.ctrlKey && tauriWin) {

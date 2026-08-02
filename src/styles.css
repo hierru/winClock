@@ -253,6 +253,42 @@ body.settings-mode #app:hover, body.settings-mode #app.hovered { box-shadow: non
 #btn-pin.active { opacity: 1; background: rgba(255, 255, 255, 0.18); }
 body.no-tauri .tauri-only { display: none; }
 
+/* resize guides: corner grips + edge arrows, visible while hovering */
+#resize-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#app:hover #resize-guides, #app.hovered #resize-guides { opacity: 1; }
+body.settings-mode #resize-guides { display: none; }
+
+#resize-guides .grip,
+#resize-guides .edge {
+  position: absolute;
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.35;
+  transition: opacity 0.15s, transform 0.15s;
+}
+#resize-guides .grip.tl { top: 5px; left: 7px; }
+#resize-guides .grip.bl { bottom: 5px; left: 7px; }
+#resize-guides .grip.br { bottom: 5px; right: 7px; }
+#resize-guides .edge.l { left: 4px; top: 50%; transform: translateY(-50%); }
+#resize-guides .edge.r { right: 4px; top: 50%; transform: translateY(-50%); }
+#resize-guides .edge.b { bottom: 18px; left: 50%; transform: translateX(-50%); }
+#resize-guides .near { opacity: 1; transform: scale(1.25); }
+#resize-guides .edge.l.near { transform: translateY(-50%) scale(1.25); }
+#resize-guides .edge.r.near { transform: translateY(-50%) scale(1.25); }
+#resize-guides .edge.b.near { transform: translateX(-50%) scale(1.25); }
+
+@media (max-height: 130px), (max-width: 260px) {
+  #resize-guides .edge { display: none; }
+}
+
 /* move hint, visible only while hovering */
 #move-hint {
   position: absolute;
