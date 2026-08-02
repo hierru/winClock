@@ -230,20 +230,55 @@ html, body {
 #app:hover #controls { opacity: 1; }
 
 .ctrl {
-  width: 26px;
-  height: 24px;
+  width: clamp(16px, 6vmin, 26px);
+  height: clamp(15px, 5.5vmin, 24px);
   border: none;
   border-radius: 6px;
   background: transparent;
   color: var(--fg);
   opacity: 0.55;
-  font-size: 13px;
+  font-size: clamp(9px, 3.2vmin, 13px);
   cursor: pointer;
   line-height: 1;
+  padding: 0;
 }
 .ctrl:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
 #btn-pin.active { opacity: 1; background: rgba(255, 255, 255, 0.18); }
 body.no-tauri .tauri-only { display: none; }
+
+/* tiny windows: hide hover buttons entirely — use the right-click menu */
+@media (max-height: 130px), (max-width: 260px) {
+  #controls { display: none; }
+}
+
+/* ---------- context menu ---------- */
+#ctx-menu {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  padding: 4px;
+  background: #1d1f21;
+  border: 1px solid #3a3d40;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+#ctx-menu.hidden { display: none; }
+#ctx-menu button {
+  border: none;
+  background: transparent;
+  color: #ddd;
+  text-align: left;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  font-family: 'Rajdhani', 'Segoe UI', 'Malgun Gothic', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#ctx-menu button:hover { background: #2d3033; }
+#ctx-menu button.checked { color: var(--fg); }
 
 /* ---------- settings panel ---------- */
 #settings {

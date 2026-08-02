@@ -865,10 +865,42 @@ const pinBtn = $('btn-pin');
 async function setPin(on) {
   state.alwaysOnTop = on;
   pinBtn.classList.toggle('active', on);
+  ctxPinBtn.classList.toggle('checked', on);
   if (tauriWin) await tauriWin.setAlwaysOnTop(on);
   saveState();
 }
 pinBtn.onclick = () => setPin(!state.alwaysOnTop);
+
+/* ---------- right-click context menu ---------- */
+
+const ctxMenu = $('ctx-menu');
+const ctxPinBtn = ctxMenu.querySelector('[data-act="pin"]');
+
+function hideCtxMenu() { ctxMenu.classList.add('hidden'); }
+
+document.addEventListener('contextmenu', (e) => {
+  // keep the native menu inside settings (paste on inputs)
+  if (e.target.closest('#settings')) return;
+  e.preventDefault();
+  ctxMenu.classList.remove('hidden');
+  const r = ctxMenu.getBoundingClientRect();
+  ctxMenu.style.left = Math.max(0, Math.min(e.clientX, window.innerWidth - r.width - 4)) + 'px';
+  ctxMenu.style.top = Math.max(0, Math.min(e.clientY, window.innerHeight - r.height - 4)) + 'px';
+});
+
+document.addEventListener('mousedown', (e) => {
+  if (!e.target.closest('#ctx-menu')) hideCtxMenu();
+});
+
+ctxMenu.addEventListener('click', (e) => {
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (!act) return;
+  hideCtxMenu();
+  if (act === 'settings') panel.classList.remove('hidden');
+  else if (act === 'pin') setPin(!state.alwaysOnTop);
+  else if (act === 'min') tauriWin && tauriWin.minimize();
+  else if (act === 'close') tauriWin && tauriWin.close();
+});
 
 /* ---------- init ---------- */
 
