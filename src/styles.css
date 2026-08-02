@@ -260,11 +260,21 @@ body.settings-mode #app {
 }
 body.settings-mode #settings {
   position: static;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: transparent;
   backdrop-filter: none;
 }
 body.settings-mode #settings-inner { padding-top: 14px; }
+
+body.settings-mode ::-webkit-scrollbar { width: 10px; }
+body.settings-mode ::-webkit-scrollbar-thumb {
+  background: #3a3d40;
+  border-radius: 5px;
+  border: 2px solid #131518;
+}
+body.settings-mode ::-webkit-scrollbar-thumb:hover { background: #55585c; }
+body.settings-mode ::-webkit-scrollbar-track { background: transparent; }
 
 /* ---------- context menu ---------- */
 #ctx-menu {
@@ -332,13 +342,19 @@ body.settings-mode #settings-inner { padding-top: 14px; }
 }
 #btn-settings-close:hover { color: #fff; }
 
-#settings section { margin-bottom: 16px; }
+#settings section {
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #26292c;
+  border-radius: 10px;
+}
 #settings h3 {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #999;
-  margin-bottom: 7px;
+  margin-bottom: 9px;
 }
 
 #settings select,
