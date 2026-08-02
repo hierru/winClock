@@ -63,9 +63,11 @@ html, body {
   transition: box-shadow 0.25s;
 }
 
-/* hover: outline the widget bounds so its size is easy to gauge */
-#app:hover { box-shadow: inset 0 0 0 1px var(--glow); }
-body.settings-mode #app:hover { box-shadow: none; }
+/* hover: outline the widget bounds so its size is easy to gauge.
+   .hovered is set by JS cursor tracking and survives the resize border,
+   where CSS :hover drops out */
+#app:hover, #app.hovered { box-shadow: inset 0 0 0 1px var(--glow); }
+body.settings-mode #app:hover, body.settings-mode #app.hovered { box-shadow: none; }
 
 /* ---------- clock face ---------- */
 #clock {
@@ -232,7 +234,7 @@ body.settings-mode #app:hover { box-shadow: none; }
   opacity: 0;
   transition: opacity 0.18s;
 }
-#app:hover #controls { opacity: 1; }
+#app:hover #controls, #app.hovered #controls { opacity: 1; }
 
 .ctrl {
   width: clamp(16px, 6vmin, 26px);
@@ -266,7 +268,7 @@ body.no-tauri .tauri-only { display: none; }
   transition: opacity 0.2s;
   pointer-events: none;
 }
-#app:hover #move-hint { opacity: 0.75; }
+#app:hover #move-hint, #app.hovered #move-hint { opacity: 0.75; }
 body.settings-mode #move-hint { display: none; }
 
 /* tiny windows: hide hover buttons entirely — use the right-click menu */

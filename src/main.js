@@ -954,6 +954,39 @@ document.addEventListener('contextmenu', (e) => {
   ctxMenu.style.top = Math.max(0, Math.min(e.clientY, window.innerHeight - r.height - 4)) + 'px';
 });
 
+/* keep the outline visible while the cursor is on or near the resize border,
+   where the webview stops receiving mouse events and CSS :hover drops out */
+const HOVER_MARGIN = 20;   // physical px around the window that still counts
+let hoverTimer = null;
+
+async function cursorNearWindow() {
+  try {
+    const [cur, pos, size] = await Promise.all([
+      window.__TAURI__.window.cursorPosition(),
+      tauriWin.outerPosition(),
+      tauriWin.outerSize(),
+    ]);
+    return (
+      cur.x >= pos.x - HOVER_MARGIN && cur.x <= pos.x + size.width + HOVER_MARGIN &&
+      cur.y >= pos.y - HOVER_MARGIN && cur.y <= pos.y + size.height + HOVER_MARGIN
+    );
+  } catch {
+    return false;
+  }
+}
+
+function startHoverWatch() {
+  if (hoverTimer || !tauriWin || IS_SETTINGS_WIN) return;
+  app.classList.add('hovered');
+  hoverTimer = setInterval(async () => {
+    if (await cursorNearWindow()) return;
+    app.classList.remove('hovered');
+    clearInterval(hoverTimer);
+    hoverTimer = null;
+  }, 150);
+}
+document.addEventListener('mousemove', startHoverWatch);
+
 /* move the window with Ctrl + left-drag (replaces the always-on drag region) */
 clock.addEventListener('mousedown', (e) => {
   if (e.button === 0 && e.ctrlKey && tauriWin) {
