@@ -997,6 +997,17 @@ const guides = {
   b:  document.querySelector('#resize-guides .edge.b'),
 };
 
+/* dragging a guide starts an OS resize in its direction */
+const RESIZE_DIRS = { tl: 'NorthWest', bl: 'SouthWest', br: 'SouthEast', l: 'West', r: 'East', b: 'South' };
+for (const [key, el] of Object.entries(guides)) {
+  el.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || !tauriWin) return;
+    e.preventDefault();
+    e.stopPropagation();
+    tauriWin.startResizeDragging(RESIZE_DIRS[key]);
+  });
+}
+
 document.addEventListener('mousemove', (e) => {
   const W = window.innerWidth, H = window.innerHeight;
   const x = e.clientX, y = e.clientY;

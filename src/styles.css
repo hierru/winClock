@@ -273,13 +273,15 @@ body.settings-mode #resize-guides { display: none; }
   line-height: 1;
   opacity: 0.35;
   transition: opacity 0.15s, transform 0.15s;
+  pointer-events: auto;   /* draggable: starts a resize in that direction */
+  padding: 6px;
 }
-#resize-guides .grip.tl { top: 5px; left: 7px; }
-#resize-guides .grip.bl { bottom: 5px; left: 7px; }
-#resize-guides .grip.br { bottom: 5px; right: 7px; }
-#resize-guides .edge.l { left: 4px; top: 50%; transform: translateY(-50%); }
-#resize-guides .edge.r { right: 4px; top: 50%; transform: translateY(-50%); }
-#resize-guides .edge.b { bottom: 18px; left: 50%; transform: translateX(-50%); }
+#resize-guides .grip.tl { top: 0; left: 2px; cursor: nwse-resize; }
+#resize-guides .grip.bl { bottom: 0; left: 2px; cursor: nesw-resize; }
+#resize-guides .grip.br { bottom: 0; right: 2px; cursor: nwse-resize; }
+#resize-guides .edge.l { left: 0; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+#resize-guides .edge.r { right: 0; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+#resize-guides .edge.b { bottom: 12px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
 #resize-guides .near { opacity: 1; transform: scale(1.25); }
 #resize-guides .edge.l.near { transform: translateY(-50%) scale(1.25); }
 #resize-guides .edge.r.near { transform: translateY(-50%) scale(1.25); }
