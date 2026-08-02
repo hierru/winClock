@@ -1054,6 +1054,24 @@ clock.addEventListener('mousedown', (e) => {
   }
 });
 
+/* move mode indicator while Ctrl is held */
+const HINT_DEFAULT = 'Ctrl + 드래그로 이동 · 우클릭 메뉴';
+const HINT_MOVE = '지금 드래그하면 창이 이동합니다';
+
+function setMoveMode(on) {
+  if (IS_SETTINGS_WIN) return;
+  app.classList.toggle('move-mode', on);
+  $('move-hint').textContent = on ? HINT_MOVE : HINT_DEFAULT;
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Control') setMoveMode(true); });
+document.addEventListener('keyup', (e) => { if (e.key === 'Control') setMoveMode(false); });
+window.addEventListener('blur', () => setMoveMode(false));
+/* safety: if Ctrl was released while the OS owned the pointer (during a
+   drag), the keyup never reaches us — clear on the next ctrl-less move */
+document.addEventListener('mousemove', (e) => {
+  if (!e.ctrlKey && app.classList.contains('move-mode')) setMoveMode(false);
+});
+
 /* the backdrop sits above the drag region, so it reliably gets the click */
 ctxBackdrop.addEventListener('mousedown', hideCtxMenu);
 document.addEventListener('mousedown', (e) => {
