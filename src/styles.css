@@ -251,6 +251,21 @@ body.no-tauri .tauri-only { display: none; }
   #controls { display: none; }
 }
 
+/* ---------- dedicated settings window (?settings=1) ---------- */
+body.settings-mode #clock,
+body.settings-mode #controls { display: none; }
+body.settings-mode #app {
+  border-radius: 0;
+  background: #131518;
+}
+body.settings-mode #settings {
+  position: static;
+  min-height: 100vh;
+  background: transparent;
+  backdrop-filter: none;
+}
+body.settings-mode #settings-inner { padding-top: 14px; }
+
 /* ---------- context menu ---------- */
 #ctx-menu {
   position: fixed;

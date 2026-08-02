@@ -5,6 +5,10 @@ const IS_TAURI = !!window.__TAURI__;
 if (!IS_TAURI) document.body.classList.add('no-tauri');
 const invoke = IS_TAURI ? window.__TAURI__.core.invoke : null;
 
+/* second window rendering only the settings page (?settings=1) */
+const IS_SETTINGS_WIN = new URLSearchParams(location.search).has('settings');
+if (IS_SETTINGS_WIN) document.body.classList.add('settings-mode');
+
 /* ---------- config ---------- */
 
 const FONTS = {
@@ -115,6 +119,9 @@ function loadState() {
 }
 function saveState() {
   localStorage.setItem('winclock', JSON.stringify(state));
+  if (IS_SETTINGS_WIN && IS_TAURI) {
+    window.__TAURI__.event.emit('winclock-settings-changed');
+  }
 }
 
 /* ---------- elements ---------- */
@@ -683,6 +690,18 @@ function buildSettingsUI() {
   bindCheck('opt-seconds', 'seconds');
   bindCheck('opt-blink', 'blink');
 
+  // always on top
+  const at = $('opt-always-top');
+  at.checked = state.alwaysOnTop;
+  at.onchange = () => {
+    if (IS_SETTINGS_WIN) {
+      state.alwaysOnTop = at.checked;
+      saveState();          // main window applies via event
+    } else {
+      setPin(at.checked);
+    }
+  };
+
   // autostart (registry-backed, Tauri only)
   if (invoke) {
     const auto = $('opt-autostart');
@@ -710,7 +729,10 @@ function buildSettingsUI() {
     String(state.calCount), (v) => { state.calCount = +v; saveState(); refreshCalendar(false); });
   $('cal-add-btn').onclick = addCal;
   $('cal-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') addCal(); });
-  $('cal-save').onclick = () => refreshCalendar(true);
+  $('cal-save').onclick = async () => {
+    await refreshCalendar(true);
+    saveState();   // notify main window to re-read the refreshed cache
+  };
 }
 
 function addCal() {
@@ -852,11 +874,50 @@ function renderDdayList() {
 
 /* ---------- window controls ---------- */
 
-$('btn-settings').onclick = () => panel.classList.remove('hidden');
-$('btn-settings-close').onclick = () => panel.classList.add('hidden');
-panel.addEventListener('click', (e) => { if (e.target === panel) panel.classList.add('hidden'); });
-
 const tauriWin = IS_TAURI ? window.__TAURI__.window.getCurrentWindow() : null;
+
+/* open settings in its own window (falls back to overlay in browser) */
+async function openSettings() {
+  if (!IS_TAURI) {
+    panel.classList.remove('hidden');
+    return;
+  }
+  const WW = window.__TAURI__.webviewWindow.WebviewWindow;
+  const existing = await WW.getByLabel('settings');
+  if (existing) {
+    await existing.setFocus();
+    return;
+  }
+  new WW('settings', {
+    url: 'index.html?settings=1',
+    title: 'winClock 설정',
+    width: 420,
+    height: 660,
+    minWidth: 340,
+    minHeight: 400,
+  });
+}
+
+$('btn-settings').onclick = openSettings;
+$('btn-settings-close').onclick = () => {
+  if (IS_SETTINGS_WIN && tauriWin) tauriWin.close();
+  else panel.classList.add('hidden');
+};
+panel.addEventListener('click', (e) => {
+  if (e.target === panel && !IS_SETTINGS_WIN) panel.classList.add('hidden');
+});
+
+/* main window: live-apply changes coming from the settings window */
+if (IS_TAURI && !IS_SETTINGS_WIN) {
+  window.__TAURI__.event.listen('winclock-settings-changed', () => {
+    state = loadState();
+    applySettings();
+    pinBtn.classList.toggle('active', state.alwaysOnTop);
+    ctxPinBtn.classList.toggle('checked', state.alwaysOnTop);
+    tauriWin.setAlwaysOnTop(state.alwaysOnTop);
+    refreshCalendar(false);
+  });
+}
 
 $('btn-close').onclick = () => tauriWin && tauriWin.close();
 $('btn-min').onclick = () => tauriWin && tauriWin.minimize();
@@ -896,7 +957,7 @@ ctxMenu.addEventListener('click', (e) => {
   const act = e.target.closest('[data-act]')?.dataset.act;
   if (!act) return;
   hideCtxMenu();
-  if (act === 'settings') panel.classList.remove('hidden');
+  if (act === 'settings') openSettings();
   else if (act === 'pin') setPin(!state.alwaysOnTop);
   else if (act === 'min') tauriWin && tauriWin.minimize();
   else if (act === 'close') tauriWin && tauriWin.close();
@@ -906,9 +967,13 @@ ctxMenu.addEventListener('click', (e) => {
 
 buildSettingsUI();
 applySettings();
-if (state.alwaysOnTop) setPin(true);
+if (IS_SETTINGS_WIN) {
+  panel.classList.remove('hidden');
+} else {
+  if (state.alwaysOnTop) setPin(true);
+  refreshCalendar(false);
+}
 tick();
-refreshCalendar(false);
 
 window.addEventListener('resize', fit);
 document.fonts.ready.then(fit);
