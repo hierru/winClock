@@ -99,6 +99,9 @@ const DEFAULTS = {
   showDday: true,
   showEvents: true,
   showQuote: true,
+  showWeather: true,
+  weatherScale: 100,
+  city: null,
   ddays: [],
   calUrls: [],
   calCount: 2,
@@ -136,6 +139,7 @@ const $ = (id) => document.getElementById(id);
 const app = $('app'), clock = $('clock'), stack = $('stack');
 const elDate = $('date'), elTime = $('time'), elGhost = $('time-ghost'), elAmpm = $('ampm');
 const elDday = $('dday-row'), elEvents = $('events-row'), elQuote = $('quote-row');
+const elWeather = $('weather-row');
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -261,6 +265,89 @@ function renderDdays() {
   }
   elDday.style.display = items.length && state.showDday ? '' : 'none';
 }
+
+/* ---------- weather (Open-Meteo, no API key) ---------- */
+
+const WEATHER_CACHE_KEY = 'winclock-weather';
+const WEATHER_REFRESH_MS = 30 * 60 * 1000;
+let weatherData = null;
+
+const WMO_MAP = [
+  [(c) => c === 0, '☀'],
+  [(c) => c <= 2, '🌤'],
+  [(c) => c === 3, '☁'],
+  [(c) => c === 45 || c === 48, '🌫'],
+  [(c) => c >= 51 && c <= 57, '🌦'],
+  [(c) => c >= 61 && c <= 67, '🌧'],
+  [(c) => c >= 71 && c <= 77, '❄'],
+  [(c) => c >= 80 && c <= 82, '🌧'],
+  [(c) => c === 85 || c === 86, '❄'],
+  [(c) => c >= 95, '⛈'],
+];
+
+function wmoIcon(code) {
+  for (const [test, icon] of WMO_MAP) if (test(code)) return icon;
+  return '☁';
+}
+
+function renderWeather() {
+  elWeather.innerHTML = '';
+  if (!state.showWeather || !state.city || !weatherData) {
+    elWeather.style.display = 'none';
+    return;
+  }
+  const icon = document.createElement('span');
+  icon.className = 'w-icon';
+  icon.textContent = wmoIcon(weatherData.code);
+  const temp = document.createElement('span');
+  temp.className = 'w-temp';
+  temp.textContent = `${Math.round(weatherData.temp)}°`;
+  const city = document.createElement('span');
+  city.className = 'w-city';
+  city.textContent = state.city.name;
+  const minmax = document.createElement('span');
+  minmax.className = 'w-minmax';
+  minmax.textContent = `${Math.round(weatherData.tmin)}°/${Math.round(weatherData.tmax)}°`;
+  elWeather.append(icon, temp, city, minmax);
+  elWeather.style.display = '';
+}
+
+async function refreshWeather(force) {
+  if (IS_SETTINGS_WIN) return;
+  if (!state.city || !state.showWeather) {
+    weatherData = null;
+    renderWeather();
+    fit();
+    return;
+  }
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null'); } catch {}
+  if (!force && cache && cache.name === state.city.name && Date.now() - cache.at < WEATHER_REFRESH_MS) {
+    weatherData = cache.data;
+    renderWeather();
+    fit();
+    return;
+  }
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.city.lat}&longitude=${state.city.lon}` +
+      `&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    weatherData = {
+      temp: j.current.temperature_2m,
+      code: j.current.weather_code,
+      tmin: j.daily.temperature_2m_min[0],
+      tmax: j.daily.temperature_2m_max[0],
+    };
+    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ at: Date.now(), name: state.city.name, data: weatherData }));
+  } catch (e) {
+    if (cache && cache.name === state.city.name) weatherData = cache.data;
+  }
+  renderWeather();
+  fit();
+}
+setInterval(() => refreshWeather(false), WEATHER_REFRESH_MS);
 
 /* ---------- daily quote ---------- */
 
@@ -552,6 +639,7 @@ function applySettings() {
   root.setProperty('--dday-size', (0.115 * state.ddayScale / 100).toFixed(4) + 'em');
   root.setProperty('--events-size', (0.095 * state.eventsScale / 100).toFixed(4) + 'em');
   root.setProperty('--quote-size', (0.085 * state.quoteScale / 100).toFixed(4) + 'em');
+  root.setProperty('--weather-size', (0.11 * state.weatherScale / 100).toFixed(4) + 'em');
   root.setProperty('--fg', theme.fg);
   root.setProperty('--glow', theme.glow);
   root.setProperty('--fg2', SUB_COLORS[state.theme2] || SUB_COLORS.gray);
@@ -565,8 +653,11 @@ function applySettings() {
   renderDdays();
   renderEvents();
   renderQuote();
+  renderWeather();
   fit();
   saveState();
+  // fetch weather lazily if it just became visible and has no data yet
+  if (!IS_SETTINGS_WIN && state.showWeather && state.city && !weatherData) refreshWeather(false);
 }
 
 /* ---------- settings UI ---------- */
@@ -758,6 +849,13 @@ function buildSettingsUI() {
   bindCheck('opt-show-dday', 'showDday');
   bindCheck('opt-show-events', 'showEvents');
   bindCheck('opt-show-quote', 'showQuote');
+  bindCheck('opt-show-weather', 'showWeather');
+  bindRange('opt-weather-scale', 'weather-scale-val', 'weatherScale', '%');
+
+  // weather city search
+  renderCityLabel();
+  $('city-search-btn').onclick = searchCity;
+  $('city-query').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchCity(); });
   renderDdayList();
   $('dday-add-btn').onclick = addDday;
   $('dday-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') addDday(); });
@@ -853,6 +951,77 @@ function buildSwatches(containerId, palette, getCurrent, setKey) {
     };
     box.appendChild(b);
   }
+}
+
+/* some Korean city names are not indexed in Hangul — known fallbacks */
+const CITY_ALIAS = {
+  '서울': 'Seoul', '제주': 'Jeju', '용인': 'Yongin', '청주': 'Cheongju',
+  '김해': 'Gimhae', '평택': 'Pyeongtaek', '안양': 'Anyang', '시흥': 'Siheung',
+};
+
+async function geocode(q) {
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=ko&format=json`);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return (await res.json()).results || [];
+}
+
+async function searchCity() {
+  const q = $('city-query').value.trim();
+  const box = $('city-results');
+  if (!q) return;
+  box.textContent = '검색 중…';
+  try {
+    let results = await geocode(q);
+    if (!results.length && CITY_ALIAS[q]) results = await geocode(CITY_ALIAS[q]);
+    if (!results.length && /[가-힣]$/.test(q) && !q.endsWith('시')) results = await geocode(q + '시');
+    box.innerHTML = '';
+    if (!results.length) {
+      box.textContent = '검색 결과가 없습니다 — 영문 이름으로 검색해 보세요 (예: Seoul)';
+      return;
+    }
+    const j = { results };
+    for (const r of j.results) {
+      const item = document.createElement('div');
+      item.className = 'city-item';
+      item.textContent = `${r.name}${r.admin1 ? ' · ' + r.admin1 : ''}${r.country ? ' (' + r.country + ')' : ''}`;
+      item.onclick = () => {
+        state.city = { name: r.name, lat: r.latitude, lon: r.longitude };
+        $('city-query').value = '';
+        box.innerHTML = '';
+        renderCityLabel();
+        saveState();
+        refreshWeather(true);
+      };
+      box.appendChild(item);
+    }
+  } catch (e) {
+    box.textContent = '검색 실패: ' + (e.message || e);
+  }
+}
+
+function renderCityLabel() {
+  const el = $('city-current');
+  el.innerHTML = '';
+  if (!state.city) {
+    el.textContent = '선택된 도시가 없습니다';
+    el.className = 'empty';
+    return;
+  }
+  el.className = '';
+  const label = document.createElement('span');
+  label.textContent = `📍 ${state.city.name}`;
+  const del = document.createElement('button');
+  del.className = 'del';
+  del.textContent = '✕';
+  del.title = '삭제';
+  del.onclick = () => {
+    state.city = null;
+    renderCityLabel();
+    saveState();
+    refreshWeather(false);
+  };
+  el.append(label, del);
 }
 
 function bindRange(id, valId, key, unit) {
@@ -955,6 +1124,7 @@ if (IS_TAURI && !IS_SETTINGS_WIN) {
     ctxPinBtn.classList.toggle('checked', state.alwaysOnTop);
     tauriWin.setAlwaysOnTop(state.alwaysOnTop);
     refreshCalendar(false);
+    refreshWeather(false);
   });
 }
 
@@ -1115,6 +1285,7 @@ if (IS_SETTINGS_WIN) {
 } else {
   if (state.alwaysOnTop) setPin(true);
   refreshCalendar(false);
+  refreshWeather(false);
 }
 tick();
 

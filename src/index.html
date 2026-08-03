@@ -20,6 +20,7 @@
     <main id="clock">
       <div id="stack">
         <div id="date" class="display"></div>
+        <div id="weather-row" class="display"></div>
         <div id="time-row" class="display">
           <span id="time-wrap">
             <span id="time-ghost" aria-hidden="true"></span>
@@ -130,6 +131,22 @@
             <input type="date" id="dday-date" />
             <button id="dday-add-btn">추가</button>
           </div>
+        </section>
+
+        <section>
+          <h3>날씨</h3>
+          <label class="row"><input type="checkbox" id="opt-show-weather" /> 시계에 표시</label>
+          <div id="city-current"></div>
+          <div id="city-add">
+            <input type="text" id="city-query" placeholder="도시 이름 (예: 서울)" />
+            <button id="city-search-btn">검색</button>
+          </div>
+          <div id="city-results"></div>
+          <label class="row">크기
+            <input type="range" id="opt-weather-scale" min="50" max="200" step="10" />
+            <span id="weather-scale-val"></span>
+          </label>
+          <p class="hint">Open-Meteo 무료 날씨 데이터를 사용하며 30분마다 자동 갱신됩니다.</p>
         </section>
 
         <section>
