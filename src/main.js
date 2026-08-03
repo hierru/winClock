@@ -953,15 +953,29 @@ function buildSwatches(containerId, palette, getCurrent, setKey) {
   }
 }
 
-/* some Korean city names are not indexed in Hangul — known fallbacks */
-const CITY_ALIAS = {
-  '서울': 'Seoul', '제주': 'Jeju', '용인': 'Yongin', '청주': 'Cheongju',
-  '김해': 'Gimhae', '평택': 'Pyeongtaek', '안양': 'Anyang', '시흥': 'Siheung',
-};
+/* Open-Meteo's geocoder indexes Korean places inconsistently (Hangul,
+   Revised Romanization, or McCune-Reischauer). Romanize Hangul queries
+   both ways and merge the results. */
+const RR_CHO = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+const RR_JUNG = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+const RR_JONG = ['','g','kk','gs','n','nj','nh','d','l','lg','lm','lb','ls','lt','lp','lh','m','b','bs','s','ss','ng','j','ch','k','t','p','h'];
+const MR_CHO = ['k','kk','n','t','tt','r','m','p','pp','s','ss','','ch','tch',"ch'","k'","t'","p'",'h'];
+const MR_JUNG = ['a','ae','ya','yae','o','e','yo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','u','ui','i'];
+const MR_JONG = ['','k','k','ks','n','nj','nh','t','l','lk','lm','lp','ls','lt','lp','lh','m','p','ps','s','ss','ng','ch','ch','k','t','p','h'];
+
+function romanizeHangul(s, cho, jung, jong) {
+  let out = '';
+  for (const ch of s) {
+    const c = ch.charCodeAt(0) - 0xac00;
+    if (c < 0 || c > 11171) { out += ch; continue; }
+    out += cho[(c / 588) | 0] + jung[((c % 588) / 28) | 0] + jong[c % 28];
+  }
+  return out;
+}
 
 async function geocode(q) {
   const res = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=ko&format=json`);
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=8&language=ko&format=json`);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return (await res.json()).results || [];
 }
@@ -972,15 +986,33 @@ async function searchCity() {
   if (!q) return;
   box.textContent = '검색 중…';
   try {
-    let results = await geocode(q);
-    if (!results.length && CITY_ALIAS[q]) results = await geocode(CITY_ALIAS[q]);
-    if (!results.length && /[가-힣]$/.test(q) && !q.endsWith('시')) results = await geocode(q + '시');
+    const queries = [q];
+    if (/[가-힣]/.test(q)) {
+      queries.push(
+        romanizeHangul(q, RR_CHO, RR_JUNG, RR_JONG),
+        romanizeHangul(q, MR_CHO, MR_JUNG, MR_JONG),
+      );
+    }
+    const results = [];
+    const seen = new Set();
+    for (const query of [...new Set(queries)]) {
+      try {
+        for (const r of await geocode(query)) {
+          const key = `${r.name}|${r.admin1 || ''}|${Math.round(r.latitude * 50)}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            results.push(r);
+          }
+        }
+      } catch {}
+    }
+    results.sort((a, b) => (b.country_code === 'KR') - (a.country_code === 'KR'));
     box.innerHTML = '';
     if (!results.length) {
       box.textContent = '검색 결과가 없습니다 — 영문 이름으로 검색해 보세요 (예: Seoul)';
       return;
     }
-    const j = { results };
+    const j = { results: results.slice(0, 10) };
     for (const r of j.results) {
       const item = document.createElement('div');
       item.className = 'city-item';
