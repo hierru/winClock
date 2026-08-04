@@ -1290,7 +1290,7 @@ function setLayoutEdit(on) {
   ctxMenu.querySelector('[data-act="layout"]').textContent =
     on ? '✓ 레이아웃 편집 종료' : '⠿ 레이아웃 편집';
   $('move-hint').textContent = on
-    ? '항목을 드래그해 배치 · ESC로 완료'
+    ? '드래그: 이동 · 휠: 크기 조절 · ESC: 완료'
     : HINT_DEFAULT;
 }
 
@@ -1303,11 +1303,15 @@ for (const [key, el] of Object.entries(FLOAT_ROWS)) {
   });
 }
 
+const GRID_STEP = 0.025;   // snap to half of the 5% visual grid
+
 document.addEventListener('mousemove', (e) => {
   if (!dragRowKey) return;
   let x = Math.min(0.97, Math.max(0.03, e.clientX / window.innerWidth));
-  const y = Math.min(0.97, Math.max(0.03, e.clientY / window.innerHeight));
-  if (Math.abs(x - 0.5) < 0.02) x = 0.5;   // snap to horizontal center
+  let y = Math.min(0.97, Math.max(0.03, e.clientY / window.innerHeight));
+  x = Math.round(x / GRID_STEP) * GRID_STEP;
+  y = Math.round(y / GRID_STEP) * GRID_STEP;
+  if (Math.abs(x - 0.5) < 0.03) x = 0.5;   // stronger snap to horizontal center
   if (!state.layout) state.layout = {};
   state.layout[dragRowKey] = { x, y };
   applyLayout();
@@ -1319,6 +1323,29 @@ document.addEventListener('mouseup', () => {
   saveState();
   fit();
 });
+
+/* wheel over a row in edit mode adjusts that row's size (10% steps) */
+const WHEEL_SCALE_KEYS = {
+  'date': 'dateScale',
+  'weather-row': 'weatherScale',
+  'dday-row': 'ddayScale',
+  'events-row': 'eventsScale',
+  'quote-row': 'quoteScale',
+  'time-row': 'scale',
+};
+
+document.addEventListener('wheel', (e) => {
+  if (!layoutEdit) return;
+  const rowEl = e.target.closest('#date, #weather-row, #dday-row, #events-row, #quote-row, #time-row');
+  if (!rowEl) return;
+  e.preventDefault();
+  const key = WHEEL_SCALE_KEYS[rowEl.id];
+  const min = key === 'scale' ? 30 : 50;
+  const max = key === 'scale' ? 100 : 200;
+  const delta = e.deltaY < 0 ? 10 : -10;
+  state[key] = Math.min(max, Math.max(min, (state[key] || 100) + delta));
+  applySettings();
+}, { passive: false });
 
 function resetLayout() {
   state.layout = {};

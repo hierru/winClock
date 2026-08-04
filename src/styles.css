@@ -262,6 +262,26 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
 #quote-row .quote-author { margin-left: 0.6em; opacity: 0.7; white-space: nowrap; }
 
 /* ---------- layout edit mode ---------- */
+#edit-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+#edit-grid::before, #edit-grid::after {
+  content: '';
+  position: absolute;
+  background: var(--glow);
+}
+#edit-grid::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+#edit-grid::after { top: 50%; left: 0; right: 0; height: 1px; }
+.layout-edit #edit-grid { display: block; }
+.layout-edit #time-row { pointer-events: auto; }
 .display.floating {
   position: absolute;
   transform: translate(-50%, -50%);
