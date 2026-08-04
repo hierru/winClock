@@ -287,11 +287,13 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   transform: translate(-50%, -50%);
   z-index: 5;
   margin: 0;
+  /* width from content, not from the left-offset-to-edge space */
+  width: max-content;
 }
 #events-row.floating, #quote-row.floating {
-  width: auto;
+  width: max-content;   /* beats the id-level width:0/min-width:100% trick */
   min-width: 0;
-  max-width: 92%;
+  /* max-width is set inline by applyLayout() based on position */
 }
 
 .layout-edit #date, .layout-edit #weather-row, .layout-edit #dday-row,

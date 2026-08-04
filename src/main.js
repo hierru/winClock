@@ -1275,10 +1275,14 @@ function applyLayout() {
       el.classList.add('floating');
       el.style.left = (p.x * 100).toFixed(2) + '%';
       el.style.top = (p.y * 100).toFixed(2) + '%';
+      // widest the row can be, centered at x, without leaving the window
+      const avail = Math.max(0.15, Math.min(p.x, 1 - p.x) * 2) * 100;
+      el.style.maxWidth = avail.toFixed(1) + '%';
     } else {
       el.classList.remove('floating');
       el.style.left = '';
       el.style.top = '';
+      el.style.maxWidth = '';
     }
   }
 }
