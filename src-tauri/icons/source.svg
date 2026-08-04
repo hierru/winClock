@@ -1,18 +1,37 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="18" result="b"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171b1f"/>
+      <stop offset="1" stop-color="#0a0c0e"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="26" result="b"/>
       <feMerge>
+        <feMergeNode in="b"/>
         <feMergeNode in="b"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
-  <rect x="32" y="32" width="960" height="960" rx="200" fill="#0f1114"/>
+
+  <rect x="32" y="32" width="960" height="960" rx="212" fill="url(#bg)"/>
+  <rect x="44" y="44" width="936" height="936" rx="200" fill="none" stroke="#2b3136" stroke-width="6"/>
+
   <g fill="#39ff14" filter="url(#glow)">
-    <rect x="238" y="340" width="76" height="344" rx="24"/>
-    <circle cx="452" cy="432" r="40"/>
-    <circle cx="452" cy="592" r="40"/>
-    <rect x="570" y="340" width="216" height="344" rx="56" fill="none" stroke="#39ff14" stroke-width="72"/>
+    <!-- digit 1 : two vertical segments -->
+    <rect x="272" y="336" width="72" height="160" rx="28"/>
+    <rect x="272" y="528" width="72" height="160" rx="28"/>
+
+    <!-- colon -->
+    <circle cx="478" cy="428" r="46"/>
+    <circle cx="478" cy="596" r="46"/>
+
+    <!-- digit 0 : six segments with 7-seg corner gaps -->
+    <rect x="654" y="308" width="166" height="60" rx="26"/>
+    <rect x="654" y="656" width="166" height="60" rx="26"/>
+    <rect x="596" y="360" width="60" height="130" rx="26"/>
+    <rect x="596" y="534" width="60" height="130" rx="26"/>
+    <rect x="818" y="360" width="60" height="130" rx="26"/>
+    <rect x="818" y="534" width="60" height="130" rx="26"/>
   </g>
 </svg>
