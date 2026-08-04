@@ -41,17 +41,32 @@ const COLORS = {
   red:    '#ff453a',
   purple: '#b388ff',
   pink:   '#ff6ec7',
+  orange: '#ff9f0a',
+  teal:   '#2dd4bf',
+  gold:   '#f5c518',
+  lime:   '#b6f34a',
+  sky:    '#7dd3fc',
+  mint:   '#98f5d0',
+  rose:   '#fda4af',
+  slate:  '#8ea3b8',
 };
 
 /* one-click color templates: main → time/date, sub → the info rows */
 const COLOR_TEMPLATES = [
-  { name: 'LCD 클래식', main: 'green', sub: 'gray' },
-  { name: '모노톤', main: 'white', sub: 'gray' },
-  { name: '레트로 계기판', main: 'green', sub: 'amber' },
-  { name: '빈티지 터미널', main: 'amber', sub: 'gray' },
-  { name: '사이버 네온', main: 'cyan', sub: 'purple' },
-  { name: '신스웨이브', main: 'pink', sub: 'cyan' },
-  { name: '알람시계', main: 'red', sub: 'gray' },
+  { group: '기본', name: 'LCD 클래식', main: 'green', sub: 'gray' },
+  { group: '기본', name: '모노톤', main: 'white', sub: 'gray' },
+  { group: '기본', name: '레트로 계기판', main: 'green', sub: 'amber' },
+  { group: '기본', name: '빈티지 터미널', main: 'amber', sub: 'gray' },
+  { group: '기본', name: '알람시계', main: 'red', sub: 'gray' },
+  { group: '보색 대비', name: '선셋 시네마', main: 'orange', sub: 'teal' },
+  { group: '보색 대비', name: '일렉트릭', main: 'gold', sub: 'purple' },
+  { group: '보색 대비', name: '체리 민트', main: 'rose', sub: 'mint' },
+  { group: '보색 대비', name: '사이버 네온', main: 'cyan', sub: 'purple' },
+  { group: '트렌드', name: '신스웨이브', main: 'pink', sub: 'cyan' },
+  { group: '트렌드', name: '오션 브리즈', main: 'sky', sub: 'slate' },
+  { group: '트렌드', name: '오로라', main: 'mint', sub: 'purple' },
+  { group: '트렌드', name: '시트러스', main: 'lime', sub: 'orange' },
+  { group: '트렌드', name: '로즈 골드', main: 'rose', sub: 'gold' },
 ];
 
 function colorOf(key) {
@@ -997,6 +1012,53 @@ function renderCalList() {
     li.append(label, del);
     ul.appendChild(li);
   });
+}
+
+function buildColorSwatches() {
+  for (const [id, key] of [
+    ['sw-time', 'timeColor'], ['sw-date', 'dateColor'], ['sw-dday', 'ddayColor'],
+    ['sw-events', 'eventsColor'], ['sw-quote', 'quoteColor'], ['sw-weather', 'weatherColor'],
+  ]) {
+    buildSwatches(id, COLORS, () => state[key], (k) => { state[key] = k; });
+  }
+}
+
+function buildColorTemplates() {
+  const box = $('color-templates');
+  box.innerHTML = '';
+  let lastGroup = '';
+  for (const t of COLOR_TEMPLATES) {
+    if (t.group !== lastGroup) {
+      lastGroup = t.group;
+      const g = document.createElement('div');
+      g.className = 'tpl-group-label';
+      g.textContent = t.group;
+      box.appendChild(g);
+    }
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tpl-chip';
+    const d1 = document.createElement('span');
+    d1.className = 'tpl-dot';
+    d1.style.background = colorOf(t.main);
+    const d2 = document.createElement('span');
+    d2.className = 'tpl-dot';
+    d2.style.background = colorOf(t.sub);
+    const label = document.createElement('span');
+    label.textContent = t.name;
+    chip.append(d1, d2, label);
+    chip.onclick = () => {
+      state.timeColor = t.main;
+      state.dateColor = t.main;
+      state.ddayColor = t.sub;
+      state.eventsColor = t.sub;
+      state.quoteColor = t.sub;
+      state.weatherColor = t.sub;
+      buildColorSwatches();   // refresh active marks
+      applySettings();
+    };
+    box.appendChild(chip);
+  }
 }
 
 function buildSwatches(containerId, palette, getCurrent, setKey) {
