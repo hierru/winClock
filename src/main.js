@@ -683,6 +683,7 @@ function applySettings() {
   renderWeather();
   applyLayout();
   fit();
+  applyLayout();   // re-clamp with final font metrics
   saveState();
   // fetch weather lazily if it just became visible and has no data yet
   if (!IS_SETTINGS_WIN && state.showWeather && state.city && !weatherData) refreshWeather(false);
@@ -1273,11 +1274,19 @@ function applyLayout() {
     const p = state.layout && state.layout[key];
     if (p) {
       el.classList.add('floating');
+      el.style.maxWidth = '96%';
+      // keep the row's natural width and clamp its position instead of
+      // letting the window edge squeeze it into wrapping
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (w > 0) {
+        const halfX = Math.min(0.48, w / 2 / window.innerWidth + 0.005);
+        const halfY = Math.min(0.48, h / 2 / window.innerHeight + 0.005);
+        p.x = Math.min(1 - halfX, Math.max(halfX, p.x));
+        p.y = Math.min(1 - halfY, Math.max(halfY, p.y));
+      }
       el.style.left = (p.x * 100).toFixed(2) + '%';
       el.style.top = (p.y * 100).toFixed(2) + '%';
-      // widest the row can be, centered at x, without leaving the window
-      const avail = Math.max(0.15, Math.min(p.x, 1 - p.x) * 2) * 100;
-      el.style.maxWidth = avail.toFixed(1) + '%';
     } else {
       el.classList.remove('floating');
       el.style.left = '';
@@ -1324,8 +1333,9 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mouseup', () => {
   if (!dragRowKey) return;
   dragRowKey = null;
-  saveState();
   fit();
+  applyLayout();
+  saveState();
 });
 
 /* wheel over a row in edit mode adjusts that row's size (10% steps) */
@@ -1461,6 +1471,6 @@ ctxMenu.addEventListener('click', (e) => {
   tick();
 })();
 
-window.addEventListener('resize', fit);
+window.addEventListener('resize', () => { fit(); applyLayout(); });
 document.fonts.ready.then(fit);
 document.fonts.onloadingdone = fit;
