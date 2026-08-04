@@ -31,27 +31,40 @@ function fontInfo(key) {
   return FONTS[key] || FONTS.dseg7;
 }
 
-const THEMES = {
-  green:  { fg: '#39ff14', glow: 'rgba(57,255,20,.45)' },
-  amber:  { fg: '#ffb000', glow: 'rgba(255,176,0,.45)' },
-  cyan:   { fg: '#00e5ff', glow: 'rgba(0,229,255,.45)' },
-  white:  { fg: '#f2f2f2', glow: 'rgba(255,255,255,.35)' },
-  red:    { fg: '#ff453a', glow: 'rgba(255,69,58,.45)' },
-  purple: { fg: '#b388ff', glow: 'rgba(179,136,255,.45)' },
-  pink:   { fg: '#ff6ec7', glow: 'rgba(255,110,199,.45)' },
-};
-
-/* secondary palette for D-Day & calendar rows */
-const SUB_COLORS = {
-  gray:   '#aeb6bd',
+/* one shared palette — every item picks its own color from it */
+const COLORS = {
   green:  '#39ff14',
   amber:  '#ffb000',
   cyan:   '#00e5ff',
   white:  '#f2f2f2',
+  gray:   '#aeb6bd',
   red:    '#ff453a',
   purple: '#b388ff',
   pink:   '#ff6ec7',
 };
+
+/* one-click color templates: main → time/date, sub → the info rows */
+const COLOR_TEMPLATES = [
+  { name: 'LCD 클래식', main: 'green', sub: 'gray' },
+  { name: '모노톤', main: 'white', sub: 'gray' },
+  { name: '레트로 계기판', main: 'green', sub: 'amber' },
+  { name: '빈티지 터미널', main: 'amber', sub: 'gray' },
+  { name: '사이버 네온', main: 'cyan', sub: 'purple' },
+  { name: '신스웨이브', main: 'pink', sub: 'cyan' },
+  { name: '알람시계', main: 'red', sub: 'gray' },
+];
+
+function colorOf(key) {
+  return COLORS[key] || COLORS.green;
+}
+
+function glowOf(key) {
+  const hex = colorOf(key);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},0.45)`;
+}
 
 const ANIMS = {
   none:  '없음',
@@ -82,8 +95,13 @@ const DEFAULTS = {
   ddayFont: 'rajdhani',
   eventsFont: 'rajdhani',
   quoteFont: 'rajdhani',
-  theme: 'green',
-  theme2: 'gray',
+  weatherFont: 'rajdhani',
+  timeColor: 'green',
+  dateColor: 'green',
+  ddayColor: 'gray',
+  eventsColor: 'gray',
+  quoteColor: 'gray',
+  weatherColor: 'gray',
   bgOpacity: 88,
   h24: true,
   seconds: true,
@@ -117,6 +135,22 @@ function loadState() {
   } catch {
     s = { ...DEFAULTS };
   }
+  // migrate old two-theme colors to per-item colors
+  try {
+    const raw = JSON.parse(localStorage.getItem('winclock') || '{}');
+    if (raw.theme && !raw.timeColor) {
+      s.timeColor = raw.theme;
+      s.dateColor = raw.theme;
+    }
+    if (raw.theme2 && !raw.ddayColor) {
+      s.ddayColor = raw.theme2;
+      s.eventsColor = raw.theme2;
+      s.quoteColor = raw.theme2;
+      s.weatherColor = raw.theme2;
+    }
+  } catch {}
+  delete s.theme;
+  delete s.theme2;
   // migrate old single-URL setting
   if (s.calUrl) {
     if (!Array.isArray(s.calUrls)) s.calUrls = [];
@@ -655,21 +689,25 @@ function tick() {
 
 function applySettings() {
   const font = fontInfo(state.font);
-  const theme = THEMES[state.theme] || THEMES.green;
   const root = document.documentElement.style;
   root.setProperty('--time-font', font.family);
   root.setProperty('--date-font', fontInfo(state.dateFont).family);
   root.setProperty('--dday-font', fontInfo(state.ddayFont).family);
   root.setProperty('--events-font', fontInfo(state.eventsFont).family);
   root.setProperty('--quote-font', fontInfo(state.quoteFont).family);
+  root.setProperty('--weather-font', fontInfo(state.weatherFont).family);
+  root.setProperty('--fg', colorOf(state.timeColor));
+  root.setProperty('--glow', glowOf(state.timeColor));
+  root.setProperty('--date-color', colorOf(state.dateColor));
+  root.setProperty('--dday-color', colorOf(state.ddayColor));
+  root.setProperty('--events-color', colorOf(state.eventsColor));
+  root.setProperty('--quote-color', colorOf(state.quoteColor));
+  root.setProperty('--weather-color', colorOf(state.weatherColor));
   root.setProperty('--date-size', (0.14 * state.dateScale / 100).toFixed(4) + 'em');
   root.setProperty('--dday-size', (0.115 * state.ddayScale / 100).toFixed(4) + 'em');
   root.setProperty('--events-size', (0.095 * state.eventsScale / 100).toFixed(4) + 'em');
   root.setProperty('--quote-size', (0.085 * state.quoteScale / 100).toFixed(4) + 'em');
   root.setProperty('--weather-size', (0.11 * state.weatherScale / 100).toFixed(4) + 'em');
-  root.setProperty('--fg', theme.fg);
-  root.setProperty('--glow', theme.glow);
-  root.setProperty('--fg2', SUB_COLORS[state.theme2] || SUB_COLORS.gray);
   root.setProperty('--bg-opacity', state.bgOpacity / 100);
   app.classList.toggle('lcd', !!font.lcd);
   app.className = app.className.replace(/\banim-\w+/g, '').trim();
@@ -820,6 +858,7 @@ function buildSettingsUI() {
     makeFontPicker('fp-dday', 'ddayFont');
     makeFontPicker('fp-events', 'eventsFont');
     makeFontPicker('fp-quote', 'quoteFont');
+    makeFontPicker('fp-weather', 'weatherFont');
   });
 
   fillSelect('opt-anim', Object.entries(ANIMS),
@@ -830,12 +869,8 @@ function buildSettingsUI() {
     Object.entries(DATE_FORMATS).map(([k, f]) => [k, k === 'none' ? '표시 안 함' : f(today)]),
     state.dateFormat, (v) => { state.dateFormat = v; applySettings(); });
 
-  // themes
-  buildSwatches('opt-theme',
-    Object.fromEntries(Object.entries(THEMES).map(([k, t]) => [k, t.fg])),
-    () => state.theme, (k) => { state.theme = k; });
-  buildSwatches('opt-theme2', SUB_COLORS,
-    () => state.theme2, (k) => { state.theme2 = k; });
+  buildColorSwatches();
+  buildColorTemplates();
 
   bindRange('opt-bg-opacity', 'bg-opacity-val', 'bgOpacity', '%');
   bindRange('opt-scale', 'scale-val', 'scale', '%');

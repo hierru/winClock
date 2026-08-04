@@ -103,6 +103,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
 #date {
   font-family: var(--date-font, inherit);
   font-size: var(--date-size, 0.14em);
+  color: var(--date-color, var(--fg));
   letter-spacing: 0.08em;
   opacity: 0.85;
   white-space: nowrap;
@@ -112,9 +113,10 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   display: flex;
   align-items: baseline;
   gap: 0.45em;
+  font-family: var(--weather-font, inherit);
   font-size: var(--weather-size, 0.11em);
   letter-spacing: 0.03em;
-  color: var(--fg2);
+  color: var(--weather-color, #aeb6bd);
   white-space: nowrap;
 }
 #weather-row .w-temp { font-weight: 700; }
@@ -203,7 +205,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   font-size: var(--dday-size, 0.115em);
   letter-spacing: 0.04em;
   white-space: nowrap;
-  color: var(--fg2);
+  color: var(--dday-color, #aeb6bd);
 }
 #dday-row .dday-name { opacity: 0.75; margin-right: 0.35em; }
 #dday-row .dday-count { font-weight: 700; }
@@ -220,7 +222,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   min-width: 100%;
   font-size: var(--events-size, 0.095em);
   letter-spacing: 0.03em;
-  color: var(--fg2);
+  color: var(--events-color, #aeb6bd);
   opacity: 0.95;
 }
 #events-row > span {
@@ -255,7 +257,7 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
   font-size: var(--quote-size, 0.085em);
   line-height: 1.45;
   text-align: center;
-  color: var(--fg2);
+  color: var(--quote-color, #aeb6bd);
   opacity: 0.8;
 }
 #quote-row .quote-text { font-style: italic; }
@@ -592,11 +594,11 @@ body.settings-mode ::-webkit-scrollbar-track { background: transparent; }
 .fp-item:hover { background: #2c2f32; }
 .fp-item.active { color: var(--fg); }
 
-.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
-.swatch-label { font-size: 11px; color: #999; margin: 7px 0 5px; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.fp-row .swatches { flex: 1; }
 .swatch {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;

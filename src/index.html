@@ -70,28 +70,16 @@
         </h2>
 
         <section>
-          <h3>폰트</h3>
-          <div class="fp-row"><span>시간</span><div id="fp-time"></div></div>
-          <div class="fp-row"><span>날짜</span><div id="fp-date"></div></div>
-          <div class="fp-row"><span>D-Day</span><div id="fp-dday"></div></div>
-          <div class="fp-row"><span>일정</span><div id="fp-events"></div></div>
-          <div class="fp-row"><span>명언</span><div id="fp-quote"></div></div>
-        </section>
-
-        <section>
-          <h3>색상</h3>
-          <div class="swatch-label">시간 · 날짜</div>
-          <div id="opt-theme" class="swatches"></div>
-          <div class="swatch-label">D-Day · 일정</div>
-          <div id="opt-theme2" class="swatches"></div>
-        </section>
-
-        <section>
           <h3>배경</h3>
           <label class="row">불투명도
             <input type="range" id="opt-bg-opacity" min="0" max="100" step="5" />
             <span id="bg-opacity-val"></span>
           </label>
+        </section>
+
+        <section>
+          <h3>색상 템플릿</h3>
+          <div id="color-templates"></div>
         </section>
 
         <section class="tauri-only">
@@ -102,6 +90,8 @@
 
         <section>
           <h3>시간</h3>
+          <div class="fp-row"><span>폰트</span><div id="fp-time"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-time" class="swatches"></div></div>
           <label class="row"><input type="checkbox" id="opt-h24" /> 24시간제</label>
           <label class="row"><input type="checkbox" id="opt-seconds" /> 초 표시</label>
           <label class="row"><input type="checkbox" id="opt-blink" /> 콜론 깜박임</label>
@@ -117,6 +107,8 @@
         <section>
           <h3>날짜</h3>
           <select id="opt-date-format"></select>
+          <div class="fp-row"><span>폰트</span><div id="fp-date"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-date" class="swatches"></div></div>
           <label class="row">크기
             <input type="range" id="opt-date-scale" min="50" max="200" step="10" />
             <span id="date-scale-val"></span>
@@ -126,6 +118,8 @@
         <section>
           <h3>D-Day</h3>
           <label class="row"><input type="checkbox" id="opt-show-dday" /> 시계에 표시</label>
+          <div class="fp-row"><span>폰트</span><div id="fp-dday"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-dday" class="swatches"></div></div>
           <label class="row">크기
             <input type="range" id="opt-dday-scale" min="50" max="200" step="10" />
             <span id="dday-scale-val"></span>
@@ -147,6 +141,8 @@
             <button id="city-search-btn">검색</button>
           </div>
           <div id="city-results"></div>
+          <div class="fp-row"><span>폰트</span><div id="fp-weather"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-weather" class="swatches"></div></div>
           <label class="row">크기
             <input type="range" id="opt-weather-scale" min="50" max="200" step="10" />
             <span id="weather-scale-val"></span>
@@ -157,6 +153,8 @@
         <section>
           <h3>오늘의 명언</h3>
           <label class="row"><input type="checkbox" id="opt-show-quote" /> 시계에 표시 (매일 자동 교체)</label>
+          <div class="fp-row"><span>폰트</span><div id="fp-quote"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-quote" class="swatches"></div></div>
           <label class="row">크기
             <input type="range" id="opt-quote-scale" min="50" max="200" step="10" />
             <span id="quote-scale-val"></span>
@@ -166,6 +164,8 @@
         <section>
           <h3>Google 캘린더</h3>
           <label class="row"><input type="checkbox" id="opt-show-events" /> 시계에 표시</label>
+          <div class="fp-row"><span>폰트</span><div id="fp-events"></div></div>
+          <div class="fp-row"><span>색상</span><div id="sw-events" class="swatches"></div></div>
           <label class="row">크기
             <input type="range" id="opt-events-scale" min="50" max="200" step="10" />
             <span id="events-scale-val"></span>
