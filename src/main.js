@@ -102,6 +102,7 @@ const DEFAULTS = {
   showWeather: true,
   weatherScale: 100,
   city: null,
+  layout: {},
   ddays: [],
   calUrls: [],
   calCount: 2,
@@ -680,6 +681,7 @@ function applySettings() {
   renderEvents();
   renderQuote();
   renderWeather();
+  applyLayout();
   fit();
   saveState();
   // fetch weather lazily if it just became visible and has no data yet
@@ -1254,6 +1256,77 @@ function startHoverWatch() {
 }
 document.addEventListener('mousemove', startHoverWatch);
 
+/* ---------- layout edit mode: drag rows to custom positions ---------- */
+
+const FLOAT_ROWS = {
+  date: elDate,
+  weather: elWeather,
+  dday: elDday,
+  events: elEvents,
+  quote: elQuote,
+};
+let layoutEdit = false;
+let dragRowKey = null;
+
+function applyLayout() {
+  for (const [key, el] of Object.entries(FLOAT_ROWS)) {
+    const p = state.layout && state.layout[key];
+    if (p) {
+      el.classList.add('floating');
+      el.style.left = (p.x * 100).toFixed(2) + '%';
+      el.style.top = (p.y * 100).toFixed(2) + '%';
+    } else {
+      el.classList.remove('floating');
+      el.style.left = '';
+      el.style.top = '';
+    }
+  }
+}
+
+function setLayoutEdit(on) {
+  if (IS_SETTINGS_WIN) return;
+  layoutEdit = on;
+  app.classList.toggle('layout-edit', on);
+  ctxMenu.querySelector('[data-act="layout"]').textContent =
+    on ? '✓ 레이아웃 편집 종료' : '⠿ 레이아웃 편집';
+  $('move-hint').textContent = on
+    ? '항목을 드래그해 배치 · ESC로 완료'
+    : HINT_DEFAULT;
+}
+
+for (const [key, el] of Object.entries(FLOAT_ROWS)) {
+  el.addEventListener('mousedown', (e) => {
+    if (!layoutEdit || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragRowKey = key;
+  });
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragRowKey) return;
+  let x = Math.min(0.97, Math.max(0.03, e.clientX / window.innerWidth));
+  const y = Math.min(0.97, Math.max(0.03, e.clientY / window.innerHeight));
+  if (Math.abs(x - 0.5) < 0.02) x = 0.5;   // snap to horizontal center
+  if (!state.layout) state.layout = {};
+  state.layout[dragRowKey] = { x, y };
+  applyLayout();
+});
+
+document.addEventListener('mouseup', () => {
+  if (!dragRowKey) return;
+  dragRowKey = null;
+  saveState();
+  fit();
+});
+
+function resetLayout() {
+  state.layout = {};
+  applyLayout();
+  fit();
+  saveState();
+}
+
 /* highlight the resize grip/arrow nearest to the cursor */
 const guides = {
   tl: document.querySelector('#resize-guides .tl'),
@@ -1320,7 +1393,12 @@ ctxBackdrop.addEventListener('mousedown', hideCtxMenu);
 document.addEventListener('mousedown', (e) => {
   if (!e.target.closest('#ctx-menu') && e.target !== ctxBackdrop) hideCtxMenu();
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideCtxMenu(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    hideCtxMenu();
+    if (layoutEdit) setLayoutEdit(false);
+  }
+});
 window.addEventListener('blur', hideCtxMenu);
 
 ctxMenu.addEventListener('click', (e) => {
@@ -1329,6 +1407,8 @@ ctxMenu.addEventListener('click', (e) => {
   hideCtxMenu();
   if (act === 'settings') openSettings();
   else if (act === 'pin') setPin(!state.alwaysOnTop);
+  else if (act === 'layout') setLayoutEdit(!layoutEdit);
+  else if (act === 'layout-reset') resetLayout();
   else if (act === 'min') tauriWin && tauriWin.minimize();
   else if (act === 'tray') tauriWin && tauriWin.hide();
   else if (act === 'close') tauriWin && tauriWin.close();

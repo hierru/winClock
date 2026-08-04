@@ -261,6 +261,32 @@ body.settings-mode #app.move-mode { box-shadow: none; cursor: default; }
 #quote-row .quote-text { font-style: italic; }
 #quote-row .quote-author { margin-left: 0.6em; opacity: 0.7; white-space: nowrap; }
 
+/* ---------- layout edit mode ---------- */
+.display.floating {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  margin: 0;
+}
+#events-row.floating, #quote-row.floating {
+  width: auto;
+  min-width: 0;
+  max-width: 92%;
+}
+
+.layout-edit #date, .layout-edit #weather-row, .layout-edit #dday-row,
+.layout-edit #events-row, .layout-edit #quote-row {
+  pointer-events: auto;
+  cursor: grab;
+  outline: 1px dashed var(--glow);
+  outline-offset: 4px;
+}
+.layout-edit #time-row {
+  outline: 1px dashed rgba(255, 255, 255, 0.12);
+  outline-offset: 4px;
+}
+.layout-edit #move-hint { opacity: 1 !important; color: var(--fg); }
+
 /* ---------- window controls ---------- */
 #controls {
   position: absolute;
