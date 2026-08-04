@@ -126,11 +126,37 @@ function loadState() {
   }
   return s;
 }
+let saveFileTimer = null;
+
 function saveState() {
-  localStorage.setItem('winclock', JSON.stringify(state));
+  const json = JSON.stringify(state);
+  localStorage.setItem('winclock', json);
+  // mirror to a real file — WebView2 localStorage can be lost on hard exits
+  if (invoke) {
+    clearTimeout(saveFileTimer);
+    saveFileTimer = setTimeout(() => {
+      invoke('save_settings', { data: JSON.stringify(state) }).catch(() => {});
+    }, 300);
+  }
   if (IS_SETTINGS_WIN && IS_TAURI) {
     window.__TAURI__.event.emit('winclock-settings-changed');
   }
+}
+
+/* on startup, the settings file is the source of truth */
+async function initStateFromFile() {
+  if (!invoke) return;
+  try {
+    const file = await invoke('load_settings');
+    const fromFile = JSON.parse(file || '{}');
+    if (fromFile && Object.keys(fromFile).length) {
+      localStorage.setItem('winclock', JSON.stringify(fromFile));
+      state = loadState();
+    } else {
+      // first run with the file store: seed it from whatever localStorage has
+      await invoke('save_settings', { data: JSON.stringify(state) });
+    }
+  } catch {}
 }
 
 /* ---------- elements ---------- */
@@ -1310,16 +1336,19 @@ ctxMenu.addEventListener('click', (e) => {
 
 /* ---------- init ---------- */
 
-buildSettingsUI();
-applySettings();
-if (IS_SETTINGS_WIN) {
-  panel.classList.remove('hidden');
-} else {
-  if (state.alwaysOnTop) setPin(true);
-  refreshCalendar(false);
-  refreshWeather(false);
-}
-tick();
+(async () => {
+  await initStateFromFile();
+  buildSettingsUI();
+  applySettings();
+  if (IS_SETTINGS_WIN) {
+    panel.classList.remove('hidden');
+  } else {
+    if (state.alwaysOnTop) setPin(true);
+    refreshCalendar(false);
+    refreshWeather(false);
+  }
+  tick();
+})();
 
 window.addEventListener('resize', fit);
 document.fonts.ready.then(fit);

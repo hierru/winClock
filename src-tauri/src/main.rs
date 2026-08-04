@@ -52,6 +52,30 @@ fn list_system_fonts() -> Vec<String> {
     set.into_iter().collect()
 }
 
+/// Durable settings store: %APPDATA%/com.hierru.winclock/settings.json.
+/// WebView2 localStorage can be lost on hard exits, so the frontend
+/// mirrors its state here.
+fn settings_file(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    use tauri::Manager;
+    let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir.join("settings.json"))
+}
+
+#[tauri::command]
+fn load_settings(app: tauri::AppHandle) -> Result<String, String> {
+    let path = settings_file(&app)?;
+    Ok(std::fs::read_to_string(path).unwrap_or_else(|_| "{}".to_string()))
+}
+
+#[tauri::command]
+fn save_settings(app: tauri::AppHandle, data: String) -> Result<(), String> {
+    let path = settings_file(&app)?;
+    let tmp = path.with_extension("json.tmp");
+    std::fs::write(&tmp, &data).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
+}
+
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const RUN_VALUE: &str = "winClock";
 
@@ -152,7 +176,9 @@ fn main() {
             fetch_ics,
             list_system_fonts,
             get_autostart,
-            set_autostart
+            set_autostart,
+            load_settings,
+            save_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running winClock");
